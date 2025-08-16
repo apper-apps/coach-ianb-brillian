@@ -276,11 +276,6 @@ const clearCompleted = () => {
         <Card className="mb-6" elevation="1">
           <h3 className="font-semibold text-gray-900 mb-4">Default Settings</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-      {/* Upload Settings */}
-<Card className="mb-6" elevation="1">
-          <h3 className="font-semibold text-gray-900 mb-4">Default Settings</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label>Default Collection</Label>
               <Select
