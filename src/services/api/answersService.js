@@ -141,9 +141,9 @@ async generateAnswer(questionId, format = "detailed") {
         source_content_type_c: source.content_type_c || "document"
       }));
       
-      // Create citation records in the database
+// Create citation records in the database
       const { citationsService } = await import('./citationsService.js');
-      const createdCitations = await citationsService.createBulk(citationObjects);
+      const createdCitations = await citationsService.create({ records: citationObjects });
       
       // Calculate confidence based on source relevance and quantity
       const confidence = this.calculateConfidence(relevantSources, questionText);
