@@ -315,17 +315,19 @@ async getMetrics(timeRange = "7d") {
       {
         id: 3,
         title: "Strategic Planning Template",
-        collection: "Templates",
+collection: "Templates",
         contentType: "document",
         references: 19,
         avgRelevance: 0.85,
         lastUsed: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-}
+      }
     ];
   }
+  
   async getCoverageGaps() {
     const metrics = await this.getMetrics();
     return metrics.coverageGaps;
   }
+}
 
 export const analyticsService = new AnalyticsService();
