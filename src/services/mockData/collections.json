@@ -41,10 +41,17 @@
     "createdAt": "2023-01-01T00:00:00Z",
     "createdBy": "system"
   },
-  {
+{
     "Id": 7,
     "name": "Interviews & Panels",
     "description": "Recorded interviews, panel discussions, and thought leadership conversations on various business and leadership topics.",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "createdBy": "system"
+  },
+  {
+    "Id": 8,
+    "name": "Goal Setting",
+    "description": "Strategic goal-setting frameworks, personal development planning, and achievement methodologies for individuals and organizations.",
     "createdAt": "2023-01-01T00:00:00Z",
     "createdBy": "system"
   }

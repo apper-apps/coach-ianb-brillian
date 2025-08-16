@@ -60,7 +60,7 @@ const CollectionsPage = () => {
     loadCollections();
   }, []);
 
-  const getCollectionIcon = (name) => {
+const getCollectionIcon = (name) => {
     switch (name) {
       case "Family Business": return "Users";
       case "Sermons & Theology": return "BookOpen";
@@ -69,11 +69,12 @@ const CollectionsPage = () => {
       case "Operations & HR": return "Settings";
       case "Strategy": return "Lightbulb";
       case "Interviews & Panels": return "Mic";
+      case "Goal Setting": return "CheckCircle";
       default: return "Folder";
     }
   };
 
-  const getCollectionColor = (name) => {
+const getCollectionColor = (name) => {
     switch (name) {
       case "Family Business": return "primary";
       case "Sermons & Theology": return "accent";
@@ -82,6 +83,7 @@ const CollectionsPage = () => {
       case "Operations & HR": return "info";
       case "Strategy": return "warning";
       case "Interviews & Panels": return "error";
+      case "Goal Setting": return "primary";
       default: return "default";
     }
   };
