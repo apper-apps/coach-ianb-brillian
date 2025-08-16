@@ -1,18 +1,60 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import ApperIcon from "@/components/ApperIcon";
 import Badge from "@/components/atoms/Badge";
 import { cn } from "@/utils/cn";
-
+import { sourcesService } from "@/services/api/sourcesService";
+import { collectionsService } from "@/services/api/collectionsService";
 const Sidebar = ({ isOpen, onClose, className = "" }) => {
   const location = useLocation();
+  const [sourcesCount, setSourcesCount] = useState(0);
+  const [collectionsCount, setCollectionsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const fetchCounts = async () => {
+    try {
+      const [sourcesData, collectionsData] = await Promise.all([
+        sourcesService.getAll(),
+        collectionsService.getAll()
+      ]);
+      
+      setSourcesCount(sourcesData.length);
+      setCollectionsCount(collectionsData.length);
+    } catch (error) {
+      console.error("Error fetching sidebar counts:", error.message);
+      // Keep existing counts if fetch fails
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCounts();
+    
+    // Set up automatic refresh every 60 seconds
+    const interval = setInterval(() => {
+      fetchCounts();
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const navigationItems = [
     { path: "/ask", label: "Ask", icon: "MessageCircle", badge: null },
     { path: "/search", label: "Search", icon: "Search", badge: null },
-    { path: "/sources", label: "Sources", icon: "Library", badge: "1,247" },
+    { 
+      path: "/sources", 
+      label: "Sources", 
+      icon: "Library", 
+      badge: loading ? "..." : sourcesCount.toLocaleString()
+    },
     { path: "/uploads", label: "Uploads", icon: "Upload", badge: null },
-    { path: "/collections", label: "Collections", icon: "FolderOpen", badge: "7" },
+    { 
+      path: "/collections", 
+      label: "Collections", 
+      icon: "FolderOpen", 
+      badge: loading ? "..." : collectionsCount.toString()
+    },
     { path: "/analytics", label: "Analytics", icon: "BarChart3", badge: null },
     { path: "/admin", label: "Admin", icon: "Settings", badge: null }
   ];

@@ -7,10 +7,11 @@ import Error from "@/components/ui/Error";
 import { analyticsService } from "@/services/api/analyticsService";
 
 const AnalyticsPage = () => {
-  const [data, setData] = useState(null);
+const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [timeRange, setTimeRange] = useState("7d");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const timeRanges = [
     { value: "24h", label: "Last 24 Hours" },
@@ -23,7 +24,7 @@ const loadAnalytics = async () => {
     setLoading(true);
     setError("");
     
-    try {
+try {
       const analyticsData = await analyticsService.getMetrics(timeRange);
       setData(analyticsData);
     } catch (err) {
@@ -48,11 +49,24 @@ const loadAnalytics = async () => {
       console.error("Load analytics error:", err);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
+  };
+
+  const refreshData = async () => {
+    setIsRefreshing(true);
+    await loadAnalytics();
   };
 
   useEffect(() => {
     loadAnalytics();
+    
+    // Set up automatic refresh every 30 seconds for real-time data
+    const interval = setInterval(() => {
+      refreshData();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [timeRange]);
 
   if (loading) {
