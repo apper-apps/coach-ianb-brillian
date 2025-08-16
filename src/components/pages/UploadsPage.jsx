@@ -79,7 +79,7 @@ const requestPasswordForUpload = (collection) => {
     }
   };
 
-  const proceedWithUpload = async () => {
+const proceedWithUpload = async () => {
     const pendingFiles = files.filter(f => f.status === "pending");
     if (pendingFiles.length === 0) return;
 
@@ -93,19 +93,40 @@ const requestPasswordForUpload = (collection) => {
         // Simulate upload progress
         await simulateUpload(file);
         
-        // Save to database
+        // Extract file content for searchability
+        const fileContent = await extractFileContent(file.file);
+        
+        // Save to content table
         const contentRecord = {
           Name: file.name,
           title_c: file.name,
           description_c: file.description || '',
           file_name_c: file.name,
           file_type_c: getContentType(file.type),
-          upload_date_c: new Date().toISOString(),
-          // In production, you would also save the collection reference
-          collection_c: file.collection
+          upload_date_c: new Date().toISOString()
         };
 
-        await contentService.create([contentRecord]);
+        const contentResult = await contentService.create([contentRecord]);
+        
+        // Also save to source table for searchability
+        const { sourcesService } = await import("@/services/api/sourcesService");
+        const sourceRecord = {
+          title_c: file.name,
+          content_c: fileContent,
+          content_type_c: getContentType(file.type),
+          collection_c: file.collection,
+          uploaded_by_c: "current-user",
+          uploaded_at_c: new Date().toISOString(),
+          metadata_c: JSON.stringify({
+            originalFileName: file.name,
+            fileSize: file.size,
+            mimeType: file.type,
+            tags: file.tags,
+            contentId: contentResult[0]?.Id
+          })
+        };
+
+        await sourcesService.create(sourceRecord);
         
         updateFileProperty(file.id, "status", "completed");
         updateFileProperty(file.id, "progress", 100);
@@ -117,6 +138,28 @@ const requestPasswordForUpload = (collection) => {
 
     setUploading(false);
     toast.success(`Successfully uploaded ${pendingFiles.length} file(s) to ${selectedCollection}`);
+  };
+
+  // Extract searchable content from files
+  const extractFileContent = async (file) => {
+    try {
+      if (file.type.startsWith('text/') || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+        return await file.text();
+      } else if (file.name.endsWith('.csv')) {
+        const text = await file.text();
+        return text.replace(/,/g, ' '); // Convert CSV to searchable text
+      } else if (file.name.endsWith('.html') || file.name.endsWith('.htm')) {
+        const text = await file.text();
+        // Basic HTML tag removal for searchability
+        return text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      }
+      
+      // For other file types, return basic metadata as searchable content
+      return `File: ${file.name}, Type: ${file.type}, Size: ${file.size} bytes`;
+    } catch (error) {
+      console.error("Error extracting file content:", error);
+      return `File: ${file.name}, Type: ${file.type}`;
+    }
   };
   const handleFilesSelected = (selectedFiles) => {
     const newFiles = selectedFiles.map(file => ({
@@ -164,14 +207,14 @@ const requestPasswordForUpload = (collection) => {
     });
   };
 
-  const handleUploadAll = async () => {
+const handleUploadAll = async () => {
     const pendingFiles = files.filter(f => f.status === "pending");
     if (pendingFiles.length === 0) {
       toast.warning("No files to upload");
       return;
     }
 
-setUploading(true);
+    setUploading(true);
     try {
       // Update all pending files to uploading status
       pendingFiles.forEach(file => {
@@ -184,25 +227,68 @@ setUploading(true);
         return;
       }
 
-      // Create content records for all pending files
-      const contentRecords = pendingFiles.map(file => ({
-        Name: file.name,
-        title_c: file.name,
-        description_c: file.description || '',
-        file_name_c: file.name,
-        file_type_c: getContentType(file.type),
-        upload_date_c: new Date().toISOString(),
-        collection_c: file.collection
-      }));
+      const { sourcesService } = await import("@/services/api/sourcesService");
+      let successCount = 0;
+      let failCount = 0;
 
-      await contentService.create(contentRecords);
+      // Process each file individually for better error handling
+      for (const file of pendingFiles) {
+        try {
+          // Simulate upload progress
+          await simulateUpload(file);
+          
+          // Extract file content for searchability
+          const fileContent = await extractFileContent(file.file);
+          
+          // Create content record
+          const contentRecord = {
+            Name: file.name,
+            title_c: file.name,
+            description_c: file.description || '',
+            file_name_c: file.name,
+            file_type_c: getContentType(file.type),
+            upload_date_c: new Date().toISOString()
+          };
+
+          const contentResult = await contentService.create([contentRecord]);
+          
+          // Create corresponding source record for searchability
+          const sourceRecord = {
+            title_c: file.name,
+            content_c: fileContent,
+            content_type_c: getContentType(file.type),
+            collection_c: file.collection,
+            uploaded_by_c: "current-user",
+            uploaded_at_c: new Date().toISOString(),
+            metadata_c: JSON.stringify({
+              originalFileName: file.name,
+              fileSize: file.size,
+              mimeType: file.type,
+              tags: file.tags,
+              contentId: contentResult[0]?.Id
+            })
+          };
+
+          await sourcesService.create(sourceRecord);
+          
+          updateFileProperty(file.id, "status", "completed");
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to upload ${file.name}:`, error);
+          updateFileProperty(file.id, "status", "error");
+          updateFileProperty(file.id, "error", error.message);
+          failCount++;
+        }
+      }
       
-      // Simulate upload progress
-      await Promise.all(pendingFiles.map(file => simulateUpload(file)));
-      
-      toast.success(`Successfully uploaded and saved ${pendingFiles.length} file(s)`);
+      if (successCount > 0) {
+        toast.success(`Successfully uploaded and saved ${successCount} file(s) to the knowledge base`);
+      }
+      if (failCount > 0) {
+        toast.error(`${failCount} file(s) failed to upload. Check individual file status for details.`);
+      }
     } catch (error) {
-      toast.error("Some uploads failed. Please try again.");
+      toast.error("Upload process failed. Please try again.");
       console.error("Upload error:", error);
       pendingFiles.forEach(file => {
         updateFileProperty(file.id, "status", "error");
