@@ -1,17 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import Button from "@/components/atoms/Button";
-import Input from "@/components/atoms/Input";
-import Card from "@/components/atoms/Card";
-import Badge from "@/components/atoms/Badge";
+import React, { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { questionsService } from "@/services/api/questionsService";
+import { answersService } from "@/services/api/answersService";
+import { toast } from "react-toastify";
+import jsPDF from "jspdf";
+import { Document, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
 import ApperIcon from "@/components/ApperIcon";
 import Loading from "@/components/ui/Loading";
 import ConfidenceMeter from "@/components/molecules/ConfidenceMeter";
 import CitationCard from "@/components/molecules/CitationCard";
-import { questionsService } from "@/services/api/questionsService";
-import { answersService } from "@/services/api/answersService";
-import { toast } from "react-toastify";
-
+import Input from "@/components/atoms/Input";
+import Button from "@/components/atoms/Button";
+import Badge from "@/components/atoms/Badge";
+import Card from "@/components/atoms/Card";
 const ChatInterface = ({ className = "" }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -91,15 +92,170 @@ const question = await questionsService.create({
     // In a real implementation, this would open the source document/media at the specific location
   };
 
-  const copyToClipboard = (content) => {
-    navigator.clipboard.writeText(content).then(() => {
-      toast.success("Answer copied to clipboard");
-    });
+const exportAnswer = async (message, format = "pdf") => {
+    try {
+      const answerText = message.content || message.answer || '';
+      const questionText = message.question || 'Question not available';
+      const confidence = message.confidence || 0;
+      const citations = message.citations || [];
+      const timestamp = new Date().toLocaleString();
+
+      // Strip HTML tags for plain text content
+      const stripHtml = (html) => {
+        const tmp = document.createElement("DIV");
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || "";
+      };
+
+      const plainTextAnswer = stripHtml(answerText);
+      const plainTextQuestion = stripHtml(questionText);
+
+      if (format === "pdf") {
+        const pdf = new jsPDF();
+        const pageWidth = pdf.internal.pageSize.width;
+        const margin = 20;
+        let y = 30;
+
+        // Title
+        pdf.setFontSize(18);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Coach IanB Knowledge Base Response', margin, y);
+        y += 20;
+
+        // Timestamp and confidence
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, 'normal');
+        pdf.text(`Generated: ${timestamp}`, margin, y);
+        y += 10;
+        pdf.text(`Confidence: ${Math.round(confidence * 100)}%`, margin, y);
+        y += 20;
+
+        // Question
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Question:', margin, y);
+        y += 10;
+        pdf.setFont(undefined, 'normal');
+        const questionLines = pdf.splitTextToSize(plainTextQuestion, pageWidth - 2 * margin);
+        pdf.text(questionLines, margin, y);
+        y += questionLines.length * 7 + 15;
+
+        // Answer
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Answer:', margin, y);
+        y += 10;
+        pdf.setFont(undefined, 'normal');
+        const answerLines = pdf.splitTextToSize(plainTextAnswer, pageWidth - 2 * margin);
+        pdf.text(answerLines, margin, y);
+        y += answerLines.length * 7 + 15;
+
+        // Citations
+        if (citations.length > 0) {
+          pdf.setFont(undefined, 'bold');
+          pdf.text('Sources:', margin, y);
+          y += 10;
+          pdf.setFont(undefined, 'normal');
+          
+          citations.forEach((citation, index) => {
+            const citationText = `${index + 1}. ${citation.source_title_c || 'Source'} - ${citation.snippet_c || 'No snippet available'}`;
+            const citationLines = pdf.splitTextToSize(citationText, pageWidth - 2 * margin);
+            pdf.text(citationLines, margin, y);
+            y += citationLines.length * 7 + 5;
+          });
+        }
+
+        pdf.save(`coach-ianb-response-${Date.now()}.pdf`);
+        toast.success('PDF exported successfully');
+
+      } else if (format === "docx") {
+        const doc = new Document({
+          sections: [{
+            properties: {},
+            children: [
+              new Paragraph({
+                text: "Coach IanB Knowledge Base Response",
+                heading: HeadingLevel.HEADING_1,
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({ text: `Generated: ${timestamp}`, break: 1 }),
+                  new TextRun({ text: `Confidence: ${Math.round(confidence * 100)}%`, break: 1 }),
+                ],
+              }),
+              new Paragraph({
+                text: "Question:",
+                heading: HeadingLevel.HEADING_2,
+              }),
+              new Paragraph({
+                text: plainTextQuestion,
+              }),
+              new Paragraph({
+                text: "Answer:",
+                heading: HeadingLevel.HEADING_2,
+              }),
+              new Paragraph({
+                text: plainTextAnswer,
+              }),
+              ...(citations.length > 0 ? [
+                new Paragraph({
+                  text: "Sources:",
+                  heading: HeadingLevel.HEADING_2,
+                }),
+                ...citations.map((citation, index) => 
+                  new Paragraph({
+                    text: `${index + 1}. ${citation.source_title_c || 'Source'} - ${citation.snippet_c || 'No snippet available'}`,
+                  })
+                )
+              ] : [])
+            ],
+          }],
+        });
+
+        const blob = await Packer.toBlob(doc);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `coach-ianb-response-${Date.now()}.docx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        toast.success('DOCX exported successfully');
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error(`Failed to export ${format.toUpperCase()}: ${error.message}`);
+    }
   };
 
-  const exportAnswer = (message, format = "pdf") => {
-    toast.info(`Exporting answer as ${format.toUpperCase()}`);
-    // In a real implementation, this would generate and download the file
+  const copyToClipboard = async (content) => {
+    try {
+      // Strip HTML tags for clipboard
+      const stripHtml = (html) => {
+        const tmp = document.createElement("DIV");
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || "";
+      };
+
+      const plainText = stripHtml(content);
+      
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(plainText);
+        toast.success("Answer copied to clipboard");
+      } else {
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = plainText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        toast.success("Answer copied to clipboard");
+      }
+    } catch (error) {
+      console.error('Copy error:', error);
+      toast.error("Failed to copy to clipboard");
+    }
   };
 
   return (
@@ -205,6 +361,7 @@ const question = await questionsService.create({
                           <ApperIcon name="Copy" size={14} className="mr-1" />
                           Copy
                         </Button>
+                        
                         
                         <Button
                           variant="ghost"
