@@ -143,13 +143,19 @@ async generateAnswer(questionId, format = "detailed") {
       
 // Create citation records in the database
       const { citationsService } = await import('./citationsService.js');
-      const createdCitations = await citationsService.create({ records: citationObjects });
+const citationResponse = await citationsService.create({ records: citationObjects });
       
       // Calculate confidence based on source relevance and quantity
       const confidence = this.calculateConfidence(relevantSources, questionText);
       
-      // Store only citation IDs as comma-separated string to respect 255 char limit
-      const citationIds = createdCitations.map(c => c.Id).join(',');
+      // Handle citation creation response properly
+      let createdCitations = [];
+      let citationIds = '';
+      
+      if (citationResponse && citationResponse.success && citationResponse.results) {
+        createdCitations = citationResponse.results.filter(r => r.success).map(r => r.data);
+        citationIds = createdCitations.map(c => c.Id).join(',');
+      }
       
       const params = {
         records: [{
@@ -185,7 +191,7 @@ const successfulRecords = response.results.filter(result => result.success);
         // Return answer with full citation objects for UI compatibility
         return {
           ...newAnswer,
-          citations: createdCitations
+citations: createdCitations
         };
       }
     } catch (error) {
