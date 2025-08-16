@@ -130,9 +130,8 @@ async generateAnswer(questionId, format = "detailed") {
       // Generate answer content based on found sources
       const answerContent = this.generateAnswerFromSources(relevantSources, format, questionText);
       
-      // Create citations from the relevant sources
-      const citations = relevantSources.slice(0, Math.min(5, relevantSources.length)).map((source, index) => ({
-        Id: source.Id,
+      // Create citations from the relevant sources and store them in citation_c table
+      const citationObjects = relevantSources.slice(0, Math.min(5, relevantSources.length)).map((source, index) => ({
         source_id_c: source.Id,
         snippet_c: this.extractSnippet(source, questionText),
         location_c: `Page 1`, // Default location
@@ -142,14 +141,21 @@ async generateAnswer(questionId, format = "detailed") {
         source_content_type_c: source.content_type_c || "document"
       }));
       
+      // Create citation records in the database
+      const { citationsService } = await import('./citationsService.js');
+      const createdCitations = await citationsService.createBulk(citationObjects);
+      
       // Calculate confidence based on source relevance and quantity
       const confidence = this.calculateConfidence(relevantSources, questionText);
+      
+      // Store only citation IDs as comma-separated string to respect 255 char limit
+      const citationIds = createdCitations.map(c => c.Id).join(',');
       
       const params = {
         records: [{
           question_id_c: parseInt(questionId),
           content_c: answerContent,
-          citations_c: JSON.stringify(citations),
+          citations_c: citationIds,
           confidence_c: confidence,
           generated_at_c: new Date().toISOString()
         }]
@@ -173,13 +179,13 @@ async generateAnswer(questionId, format = "detailed") {
           });
         }
         
-        const successfulRecords = response.results.filter(result => result.success);
+const successfulRecords = response.results.filter(result => result.success);
         const newAnswer = successfulRecords[0]?.data;
         
-        // Return answer with parsed citations for compatibility
+        // Return answer with full citation objects for UI compatibility
         return {
           ...newAnswer,
-          citations: citations
+          citations: createdCitations
         };
       }
     } catch (error) {
@@ -373,8 +379,13 @@ async generateAnswer(questionId, format = "detailed") {
         Id: parseInt(id)
       };
       
-      if (updates.content_c !== undefined) updateData.content_c = updates.content_c;
-      if (updates.citations_c !== undefined) updateData.citations_c = typeof updates.citations_c === 'string' ? updates.citations_c : JSON.stringify(updates.citations_c);
+if (updates.content_c !== undefined) updateData.content_c = updates.content_c;
+      if (updates.citations_c !== undefined) {
+        // Handle citations as comma-separated IDs string to respect 255 char limit
+        updateData.citations_c = Array.isArray(updates.citations_c) 
+          ? updates.citations_c.map(c => c.Id || c).join(',')
+          : updates.citations_c;
+      }
       if (updates.confidence_c !== undefined) updateData.confidence_c = updates.confidence_c;
       
       const params = {
