@@ -110,38 +110,38 @@ const SearchResults = ({
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex items-center gap-2">
                     <ApperIcon 
-                      name={getContentTypeIcon(result.contentType)} 
+name={getContentTypeIcon(result.content_type_c || result.contentType)} 
                       size={16} 
                       className="text-gray-500"
                     />
                     <Badge 
-                      variant={getContentTypeColor(result.contentType)}
+                      variant={getContentTypeColor(result.content_type_c || result.contentType)}
                       className="text-xs"
                     >
-                      {result.contentType.toUpperCase()}
+                      {(result.content_type_c || result.contentType).toUpperCase()}
                     </Badge>
                   </div>
-                  <Badge variant="primary" className="text-xs">
-                    {result.collection}
+<Badge variant="primary" className="text-xs">
+                    {result.collection_c || result.collection}
                   </Badge>
                 </div>
                 
-                <h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-2">
-                  {result.title}
+<h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-2">
+                  {result.title_c || result.title}
                 </h3>
                 
-                <p className="text-gray-600 mb-3 line-clamp-3">
-                  {result.content?.substring(0, 200)}...
+<p className="text-gray-600 mb-3 line-clamp-3">
+                  {(result.content_c || result.content)?.substring(0, 200)}...
                 </p>
                 
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <span>By {result.metadata?.author || "Coach IanB"}</span>
+<div className="flex items-center gap-4 text-sm text-gray-500">
+                  <span>By {((result.metadata_c ? (typeof result.metadata_c === 'string' ? JSON.parse(result.metadata_c) : result.metadata_c) : result.metadata)?.author) || "Coach IanB"}</span>
                   <span>•</span>
-                  <span>{new Date(result.uploadedAt).toLocaleDateString()}</span>
-                  {result.metadata?.duration && (
+                  <span>{new Date(result.uploaded_at_c || result.uploadedAt).toLocaleDateString()}</span>
+                  {((result.metadata_c ? (typeof result.metadata_c === 'string' ? JSON.parse(result.metadata_c) : result.metadata_c) : result.metadata)?.duration) && (
                     <>
                       <span>•</span>
-                      <span>{result.metadata.duration}</span>
+                      <span>{(result.metadata_c ? (typeof result.metadata_c === 'string' ? JSON.parse(result.metadata_c) : result.metadata_c) : result.metadata).duration}</span>
                     </>
                   )}
                 </div>
@@ -166,16 +166,16 @@ const SearchResults = ({
               </div>
             </div>
             
-            {result.metadata?.tags && result.metadata.tags.length > 0 && (
+{((result.metadata_c ? (typeof result.metadata_c === 'string' ? JSON.parse(result.metadata_c) : result.metadata_c) : result.metadata)?.tags && (result.metadata_c ? (typeof result.metadata_c === 'string' ? JSON.parse(result.metadata_c) : result.metadata_c) : result.metadata).tags.length > 0) && (
               <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-200">
-                {result.metadata.tags.slice(0, 5).map((tag, tagIndex) => (
+                {(result.metadata_c ? (typeof result.metadata_c === 'string' ? JSON.parse(result.metadata_c) : result.metadata_c) : result.metadata).tags.slice(0, 5).map((tag, tagIndex) => (
                   <Badge key={tagIndex} variant="default" className="text-xs">
                     {tag}
                   </Badge>
                 ))}
-                {result.metadata.tags.length > 5 && (
+                {(result.metadata_c ? (typeof result.metadata_c === 'string' ? JSON.parse(result.metadata_c) : result.metadata_c) : result.metadata).tags.length > 5 && (
                   <Badge variant="default" className="text-xs">
-                    +{result.metadata.tags.length - 5} more
+                    +{(result.metadata_c ? (typeof result.metadata_c === 'string' ? JSON.parse(result.metadata_c) : result.metadata_c) : result.metadata).tags.length - 5} more
                   </Badge>
                 )}
               </div>

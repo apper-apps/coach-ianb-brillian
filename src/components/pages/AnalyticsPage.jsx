@@ -112,7 +112,7 @@ const AnalyticsPage = () => {
               <ApperIcon name="MessageCircle" size={20} className="text-white" />
             </div>
             <div>
-              <p className="text-sm text-primary-600 font-medium">Questions Asked</p>
+<p className="text-sm text-primary-600 font-medium">Questions Asked</p>
               <p className="text-2xl font-bold text-primary-800">{data.questionsCount}</p>
               <p className="text-xs text-primary-600">
                 {data.questionsGrowth > 0 ? "+" : ""}{data.questionsGrowth}% vs last period
@@ -127,7 +127,7 @@ const AnalyticsPage = () => {
               <ApperIcon name="Target" size={20} className="text-white" />
             </div>
             <div>
-              <p className="text-sm text-secondary-600 font-medium">Avg Confidence</p>
+<p className="text-sm text-secondary-600 font-medium">Avg Confidence</p>
               <p className="text-2xl font-bold text-secondary-800">
                 {Math.round(data.avgConfidence * 100)}%
               </p>

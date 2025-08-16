@@ -98,9 +98,11 @@ const SourcesPage = () => {
     }
   };
 
-  const filteredSources = sources.filter(source => {
-    const matchesSearch = source.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         source.content.toLowerCase().includes(searchTerm.toLowerCase());
+const filteredSources = sources.filter(source => {
+    const title = source.title_c || source.title || '';
+    const content = source.content_c || source.content || '';
+    const matchesSearch = title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         content.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesSearch;
   });
 
@@ -268,14 +270,14 @@ const SourcesPage = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <Badge 
-                        variant={getContentTypeColor(source.contentType)}
-                        className="text-xs"
-                      >
-                        {source.contentType.toUpperCase()}
-                      </Badge>
-                      <Badge variant="primary" className="text-xs">
-                        {source.collection}
-                      </Badge>
+variant={getContentTypeColor(source.content_type_c || source.contentType)}
+                      className="text-xs"
+                    >
+                      {(source.content_type_c || source.contentType).toUpperCase()}
+                    </Badge>
+<Badge variant="primary" className="text-xs">
+                      {source.collection_c || source.collection}
+                    </Badge>
                       {source.metadata?.needsReview && (
                         <Badge variant="warning" className="text-xs">
                           Needs Review
@@ -283,42 +285,42 @@ const SourcesPage = () => {
                       )}
                     </div>
 
-                    <h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-1">
-                      {source.title}
+<h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-1">
+                      {source.title_c || source.title}
                     </h3>
 
                     <p className="text-gray-600 mb-3 line-clamp-2">
-                      {source.content?.substring(0, 150)}...
+                      {(source.content_c || source.content)?.substring(0, 150)}...
                     </p>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span>Uploaded by {source.uploadedBy}</span>
+<div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span>Uploaded by {source.uploaded_by_c || source.uploadedBy}</span>
                       <span>•</span>
-                      <span>{new Date(source.uploadedAt).toLocaleDateString()}</span>
-                      {source.metadata?.fileSize && (
+                      <span>{new Date(source.uploaded_at_c || source.uploadedAt).toLocaleDateString()}</span>
+{((source.metadata_c ? (typeof source.metadata_c === 'string' ? JSON.parse(source.metadata_c) : source.metadata_c) : source.metadata)?.fileSize) && (
                         <>
                           <span>•</span>
-                          <span>{source.metadata.fileSize}</span>
+                          <span>{(source.metadata_c ? (typeof source.metadata_c === 'string' ? JSON.parse(source.metadata_c) : source.metadata_c) : source.metadata).fileSize}</span>
                         </>
                       )}
-                      {source.metadata?.duration && (
+                      {((source.metadata_c ? (typeof source.metadata_c === 'string' ? JSON.parse(source.metadata_c) : source.metadata_c) : source.metadata)?.duration) && (
                         <>
                           <span>•</span>
-                          <span>{source.metadata.duration}</span>
+                          <span>{(source.metadata_c ? (typeof source.metadata_c === 'string' ? JSON.parse(source.metadata_c) : source.metadata_c) : source.metadata).duration}</span>
                         </>
                       )}
                     </div>
 
-                    {source.metadata?.tags && source.metadata.tags.length > 0 && (
+{((source.metadata_c ? (typeof source.metadata_c === 'string' ? JSON.parse(source.metadata_c) : source.metadata_c) : source.metadata)?.tags && (source.metadata_c ? (typeof source.metadata_c === 'string' ? JSON.parse(source.metadata_c) : source.metadata_c) : source.metadata).tags.length > 0) && (
                       <div className="flex flex-wrap gap-1 mt-3">
-                        {source.metadata.tags.slice(0, 3).map((tag, tagIndex) => (
+                        {(source.metadata_c ? (typeof source.metadata_c === 'string' ? JSON.parse(source.metadata_c) : source.metadata_c) : source.metadata).tags.slice(0, 3).map((tag, tagIndex) => (
                           <Badge key={tagIndex} variant="default" className="text-xs">
                             {tag}
                           </Badge>
                         ))}
-                        {source.metadata.tags.length > 3 && (
+                        {(source.metadata_c ? (typeof source.metadata_c === 'string' ? JSON.parse(source.metadata_c) : source.metadata_c) : source.metadata).tags.length > 3 && (
                           <Badge variant="default" className="text-xs">
-                            +{source.metadata.tags.length - 3}
+                            +{(source.metadata_c ? (typeof source.metadata_c === 'string' ? JSON.parse(source.metadata_c) : source.metadata_c) : source.metadata).tags.length - 3}
                           </Badge>
                         )}
                       </div>

@@ -25,21 +25,23 @@ const CollectionsPage = () => {
       ]);
 
       // Calculate stats for each collection
-      const collectionsWithStats = collectionsData.map(collection => {
+const collectionsWithStats = collectionsData.map(collection => {
         const collectionSources = sourcesData.filter(source => 
-          source.collection === collection.name
+          source.collection_c === collection.Name || source.collection === collection.Name
         );
         
-        const contentTypes = [...new Set(collectionSources.map(s => s.contentType))];
+const contentTypes = [...new Set(collectionSources.map(s => s.content_type_c || s.contentType))];
         const totalSize = collectionSources.reduce((sum, source) => 
-          sum + (source.metadata?.fileSize || 0), 0
+          sum + (source.metadata_c ? (typeof source.metadata_c === 'string' ? JSON.parse(source.metadata_c).fileSize || 0 : source.metadata_c.fileSize || 0) : source.metadata?.fileSize || 0), 0
         );
-        const lastUpdated = collectionSources.length > 0 
-          ? new Date(Math.max(...collectionSources.map(s => new Date(s.uploadedAt))))
+const lastUpdated = collectionSources.length > 0 
+          ? new Date(Math.max(...collectionSources.map(s => new Date(s.uploaded_at_c || s.uploadedAt))))
           : null;
 
-        return {
+return {
           ...collection,
+          name: collection.Name,
+          description: collection.description_c,
           sourceCount: collectionSources.length,
           contentTypes,
           totalSize,

@@ -53,9 +53,9 @@ const AdminPage = () => {
 
   const handleRoleChange = async (userId, newRole) => {
     try {
-      await usersService.update(userId, { role: newRole });
+await usersService.update(userId, { role_c: newRole });
       setUsers(prev => prev.map(user => 
-        user.Id === userId ? { ...user, role: newRole } : user
+        user.Id === userId ? { ...user, role_c: newRole, role: newRole } : user
       ));
       toast.success("User role updated successfully");
     } catch (err) {
@@ -238,10 +238,10 @@ const AdminPage = () => {
                             <span className="font-medium text-gray-900">{user.name || "User"}</span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-gray-600">{user.email}</td>
+<td className="py-3 px-4 text-gray-600">{user.email_c || user.email}</td>
                         <td className="py-3 px-4">
                           <Select
-                            value={user.role}
+                            value={user.role_c || user.role}
                             onChange={(e) => handleRoleChange(user.Id, e.target.value)}
                             className="w-32 text-sm"
                           >
@@ -252,8 +252,8 @@ const AdminPage = () => {
                             ))}
                           </Select>
                         </td>
-                        <td className="py-3 px-4 text-gray-600">
-                          {new Date(user.joinedAt).toLocaleDateString()}
+<td className="py-3 px-4 text-gray-600">
+                          {new Date(user.joined_at_c || user.joinedAt).toLocaleDateString()}
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex gap-2">

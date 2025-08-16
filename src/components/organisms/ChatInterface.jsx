@@ -44,8 +44,7 @@ const ChatInterface = ({ className = "" }) => {
     setIsLoading(true);
 
     try {
-      // Create question record
-      const question = await questionsService.create({
+const question = await questionsService.create({
         text: userMessage.content,
         userId: "current-user",
         answerFormat: answerFormat

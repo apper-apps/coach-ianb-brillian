@@ -1,21 +1,24 @@
-class CollectionsService {
+class CitationsService {
   constructor() {
     const { ApperClient } = window.ApperSDK;
     this.apperClient = new ApperClient({
       apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
       apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
     });
-    this.tableName = 'collection_c';
+    this.tableName = 'citation_c';
   }
 
   async getAll() {
     try {
       const params = {
         fields: [
-          { field: { Name: "Name" } },
-          { field: { Name: "description_c" } },
-          { field: { Name: "created_at_c" } },
-          { field: { Name: "created_by_c" } }
+          { field: { Name: "source_id_c" } },
+          { field: { Name: "snippet_c" } },
+          { field: { Name: "location_c" } },
+          { field: { Name: "relevance_score_c" } },
+          { field: { Name: "source_title_c" } },
+          { field: { Name: "source_collection_c" } },
+          { field: { Name: "source_content_type_c" } }
         ],
         orderBy: [{ fieldName: "Id", sorttype: "DESC" }]
       };
@@ -30,9 +33,9 @@ class CollectionsService {
       return response.data || [];
     } catch (error) {
       if (error?.response?.data?.message) {
-        console.error("Error fetching collections:", error?.response?.data?.message);
+        console.error("Error fetching citations:", error?.response?.data?.message);
       } else {
-        console.error("Error fetching collections:", error.message);
+        console.error("Error fetching citations:", error.message);
       }
       throw error;
     }
@@ -42,10 +45,13 @@ class CollectionsService {
     try {
       const params = {
         fields: [
-          { field: { Name: "Name" } },
-          { field: { Name: "description_c" } },
-          { field: { Name: "created_at_c" } },
-          { field: { Name: "created_by_c" } }
+          { field: { Name: "source_id_c" } },
+          { field: { Name: "snippet_c" } },
+          { field: { Name: "location_c" } },
+          { field: { Name: "relevance_score_c" } },
+          { field: { Name: "source_title_c" } },
+          { field: { Name: "source_collection_c" } },
+          { field: { Name: "source_content_type_c" } }
         ]
       };
       
@@ -59,22 +65,26 @@ class CollectionsService {
       return response.data;
     } catch (error) {
       if (error?.response?.data?.message) {
-        console.error(`Error fetching collection with ID ${id}:`, error?.response?.data?.message);
+        console.error(`Error fetching citation with ID ${id}:`, error?.response?.data?.message);
       } else {
-        console.error(`Error fetching collection with ID ${id}:`, error.message);
+        console.error(`Error fetching citation with ID ${id}:`, error.message);
       }
       throw error;
     }
   }
 
-  async create(collectionData) {
+  async create(citationData) {
     try {
       const params = {
         records: [{
-          Name: collectionData.name,
-          description_c: collectionData.description,
-          created_at_c: new Date().toISOString(),
-          created_by_c: collectionData.created_by_c || "current-user"
+          Name: citationData.source_title_c || citationData.sourceTitle || "Citation",
+          source_id_c: citationData.source_id_c || citationData.sourceId,
+          snippet_c: citationData.snippet_c || citationData.snippet,
+          location_c: citationData.location_c || citationData.location,
+          relevance_score_c: citationData.relevance_score_c || citationData.relevanceScore || 0.8,
+          source_title_c: citationData.source_title_c || citationData.sourceTitle,
+          source_collection_c: citationData.source_collection_c || citationData.sourceCollection,
+          source_content_type_c: citationData.source_content_type_c || citationData.sourceContentType
         }]
       };
       
@@ -88,7 +98,7 @@ class CollectionsService {
       if (response.results) {
         const failedRecords = response.results.filter(result => !result.success);
         if (failedRecords.length > 0) {
-          console.error(`Failed to create collections ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          console.error(`Failed to create citations ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
           failedRecords.forEach(record => {
             record.errors?.forEach(error => {
               throw new Error(`${error.fieldLabel}: ${error.message}`);
@@ -101,9 +111,9 @@ class CollectionsService {
       }
     } catch (error) {
       if (error?.response?.data?.message) {
-        console.error("Error creating collection:", error?.response?.data?.message);
+        console.error("Error creating citation:", error?.response?.data?.message);
       } else {
-        console.error("Error creating collection:", error.message);
+        console.error("Error creating citation:", error.message);
       }
       throw error;
     }
@@ -115,9 +125,13 @@ class CollectionsService {
         Id: parseInt(id)
       };
       
-      if (updates.name !== undefined) updateData.Name = updates.name;
-      if (updates.description_c !== undefined) updateData.description_c = updates.description_c;
-      if (updates.created_by_c !== undefined) updateData.created_by_c = updates.created_by_c;
+      if (updates.source_id_c !== undefined) updateData.source_id_c = updates.source_id_c;
+      if (updates.snippet_c !== undefined) updateData.snippet_c = updates.snippet_c;
+      if (updates.location_c !== undefined) updateData.location_c = updates.location_c;
+      if (updates.relevance_score_c !== undefined) updateData.relevance_score_c = updates.relevance_score_c;
+      if (updates.source_title_c !== undefined) updateData.source_title_c = updates.source_title_c;
+      if (updates.source_collection_c !== undefined) updateData.source_collection_c = updates.source_collection_c;
+      if (updates.source_content_type_c !== undefined) updateData.source_content_type_c = updates.source_content_type_c;
       
       const params = {
         records: [updateData]
@@ -133,7 +147,7 @@ class CollectionsService {
       if (response.results) {
         const failedRecords = response.results.filter(result => !result.success);
         if (failedRecords.length > 0) {
-          console.error(`Failed to update collections ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          console.error(`Failed to update citations ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
           failedRecords.forEach(record => {
             record.errors?.forEach(error => {
               throw new Error(`${error.fieldLabel}: ${error.message}`);
@@ -146,9 +160,9 @@ class CollectionsService {
       }
     } catch (error) {
       if (error?.response?.data?.message) {
-        console.error("Error updating collection:", error?.response?.data?.message);
+        console.error("Error updating citation:", error?.response?.data?.message);
       } else {
-        console.error("Error updating collection:", error.message);
+        console.error("Error updating citation:", error.message);
       }
       throw error;
     }
@@ -170,21 +184,21 @@ class CollectionsService {
       if (response.results) {
         const failedRecords = response.results.filter(result => !result.success);
         if (failedRecords.length > 0) {
-          console.error(`Failed to delete collections ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
-          throw new Error("Failed to delete collection");
+          console.error(`Failed to delete citations ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+          throw new Error("Failed to delete citation");
         }
       }
       
       return true;
     } catch (error) {
       if (error?.response?.data?.message) {
-        console.error("Error deleting collection:", error?.response?.data?.message);
+        console.error("Error deleting citation:", error?.response?.data?.message);
       } else {
-        console.error("Error deleting collection:", error.message);
+        console.error("Error deleting citation:", error.message);
       }
       throw error;
     }
   }
 }
 
-export const collectionsService = new CollectionsService();
+export const citationsService = new CitationsService();
