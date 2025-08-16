@@ -145,13 +145,12 @@ async getMetrics(timeRange = "7d") {
       console.warn("Failed to parse JSON field:", error);
       return null;
     }
-  }
 }
 
   getPeakDay() {
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     return days[Math.floor(Math.random() * days.length)];
-
+  }
   async getTopTopics(timeRange = "7d") {
     try {
       const response = await this.apperClient.fetchRecords("question_c", {
@@ -321,11 +320,9 @@ async getMetrics(timeRange = "7d") {
         references: 19,
         avgRelevance: 0.85,
         lastUsed: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      }
+}
     ];
-];
   }
-
   async getCoverageGaps() {
     const metrics = await this.getMetrics();
     return metrics.coverageGaps;
