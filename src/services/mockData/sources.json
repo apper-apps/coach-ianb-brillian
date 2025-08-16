@@ -1,0 +1,156 @@
+[
+  {
+    "Id": 1,
+    "title": "Family Business Charter: Building Strong Foundations",
+    "content": "The four pillars of effective family business governance include clear ownership structures, defined decision-making processes, performance accountability, and conflict resolution mechanisms. This comprehensive guide outlines how to establish these foundations for long-term success.",
+    "contentType": "pdf",
+    "collection": "Family Business",
+    "uploadedBy": "Coach IanB",
+    "uploadedAt": "2024-01-10T09:00:00Z",
+    "metadata": {
+      "author": "Coach IanB",
+      "pages": 42,
+      "fileSize": "2.3 MB",
+      "tags": ["governance", "charter", "foundations", "family-business"]
+    }
+  },
+  {
+    "Id": 2,
+    "title": "Leadership Workshop - Family Dynamics",
+    "content": "This workshop recording covers the challenges of leading family members in business contexts, establishing boundaries, and maintaining healthy relationships while driving business results.",
+    "contentType": "audio",
+    "collection": "Coaching & Workshops",
+    "uploadedBy": "Team Member",
+    "uploadedAt": "2024-01-08T14:30:00Z",
+    "metadata": {
+      "duration": "2h 15min",
+      "fileSize": "128 MB",
+      "speaker": "Coach IanB",
+      "tags": ["leadership", "family-dynamics", "workshop", "boundaries"]
+    }
+  },
+  {
+    "Id": 3,
+    "title": "Strategic Planning for Multi-Generation Businesses",
+    "content": "A comprehensive framework for developing long-term strategies that account for multiple generations of family involvement, including succession planning and leadership development.",
+    "contentType": "pdf",
+    "collection": "Strategy",
+    "uploadedBy": "Admin User",
+    "uploadedAt": "2024-01-05T11:20:00Z",
+    "metadata": {
+      "author": "Coach IanB",
+      "pages": 68,
+      "fileSize": "4.1 MB",
+      "tags": ["strategy", "succession", "multi-generation", "planning"]
+    }
+  },
+  {
+    "Id": 4,
+    "title": "Conflict Resolution in Christian Business",
+    "content": "This sermon explores biblical principles for handling conflicts in business settings, drawing from Matthew 18 and other scriptural foundations for healthy relationship management.",
+    "contentType": "video",
+    "collection": "Sermons & Theology",
+    "uploadedBy": "Ministry Team",
+    "uploadedAt": "2024-01-03T19:00:00Z",
+    "metadata": {
+      "duration": "45min",
+      "fileSize": "890 MB",
+      "speaker": "Coach IanB",
+      "scripture": "Matthew 18:15-17",
+      "tags": ["conflict-resolution", "biblical-principles", "christian-business"]
+    }
+  },
+  {
+    "Id": 5,
+    "title": "KPI Design for FMCG Sales Teams",
+    "content": "Practical framework for designing key performance indicators that drive results in fast-moving consumer goods sales environments, including territory management and customer development metrics.",
+    "contentType": "pdf",
+    "collection": "Sales & FMCG",
+    "uploadedBy": "Sales Director",
+    "uploadedAt": "2024-01-02T08:45:00Z",
+    "metadata": {
+      "author": "Coach IanB",
+      "pages": 24,
+      "fileSize": "1.8 MB",
+      "industry": "FMCG",
+      "tags": ["kpi", "sales", "fmcg", "performance-management"]
+    }
+  },
+  {
+    "Id": 6,
+    "title": "Mentoring Next-Gen Leaders Interview",
+    "content": "In-depth interview discussing best practices for developing next-generation leaders in family businesses, including the importance of external experience and structured mentoring programs.",
+    "contentType": "audio",
+    "collection": "Interviews & Panels",
+    "uploadedBy": "Media Team",
+    "uploadedAt": "2023-12-28T16:15:00Z",
+    "metadata": {
+      "duration": "1h 30min",
+      "fileSize": "86 MB",
+      "interviewer": "Business Journal",
+      "tags": ["mentoring", "next-generation", "leadership-development", "interview"]
+    }
+  },
+  {
+    "Id": 7,
+    "title": "Operational Excellence in Family Business",
+    "content": "Framework for implementing operational excellence practices while maintaining the personal touch and values that make family businesses unique.",
+    "contentType": "document",
+    "collection": "Operations & HR",
+    "uploadedBy": "Operations Manager",
+    "uploadedAt": "2023-12-25T12:00:00Z",
+    "metadata": {
+      "author": "Coach IanB",
+      "pages": 35,
+      "fileSize": "2.1 MB",
+      "tags": ["operations", "excellence", "family-business", "processes"]
+    }
+  },
+  {
+    "Id": 8,
+    "title": "Revelation 14:6-13 Exposition",
+    "content": "Deep theological exposition of Revelation 14:6-13, exploring themes of eternal gospel, divine judgment, and faithful endurance in challenging times.",
+    "contentType": "audio",
+    "collection": "Sermons & Theology",
+    "uploadedBy": "Pastor IanB",
+    "uploadedAt": "2023-12-20T10:30:00Z",
+    "metadata": {
+      "duration": "52min",
+      "fileSize": "94 MB",
+      "scripture": "Revelation 14:6-13",
+      "series": "End Times Hope",
+      "tags": ["revelation", "prophecy", "endurance", "gospel"]
+    }
+  },
+  {
+    "Id": 9,
+    "title": "Performance Management Workshop Recording",
+    "content": "Comprehensive workshop on implementing performance management systems that align with family business values while maintaining accountability and driving results.",
+    "contentType": "video",
+    "collection": "Coaching & Workshops",
+    "uploadedBy": "HR Director",
+    "uploadedAt": "2023-12-18T13:45:00Z",
+    "metadata": {
+      "duration": "3h 20min",
+      "fileSize": "1.2 GB",
+      "speaker": "Coach IanB",
+      "participants": 45,
+      "tags": ["performance-management", "accountability", "family-business", "workshop"]
+    }
+  },
+  {
+    "Id": 10,
+    "title": "Digital Transformation Strategy Guide",
+    "content": "Strategic guide for implementing digital transformation initiatives in traditional family businesses while preserving core values and relationships.",
+    "contentType": "pdf",
+    "collection": "Strategy",
+    "uploadedBy": "IT Director",
+    "uploadedAt": "2023-12-15T09:20:00Z",
+    "metadata": {
+      "author": "Coach IanB & Tech Team",
+      "pages": 58,
+      "fileSize": "3.7 MB",
+      "tags": ["digital-transformation", "strategy", "technology", "innovation"]
+    }
+  }
+]

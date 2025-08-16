@@ -1,0 +1,51 @@
+[
+  {
+    "Id": 1,
+    "name": "Family Business",
+    "description": "Comprehensive resources on building, managing, and transitioning family-owned businesses across generations.",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "createdBy": "system"
+  },
+  {
+    "Id": 2,
+    "name": "Sermons & Theology",
+    "description": "Biblical teachings and theological insights that integrate faith principles with practical life and business applications.",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "createdBy": "system"
+  },
+  {
+    "Id": 3,
+    "name": "Coaching & Workshops",
+    "description": "Interactive coaching sessions and workshop recordings focused on leadership development and practical skill building.",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "createdBy": "system"
+  },
+  {
+    "Id": 4,
+    "name": "Sales & FMCG",
+    "description": "Specialized content for sales excellence in fast-moving consumer goods and retail environments.",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "createdBy": "system"
+  },
+  {
+    "Id": 5,
+    "name": "Operations & HR",
+    "description": "Best practices for operational excellence and human resource management in growing businesses.",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "createdBy": "system"
+  },
+  {
+    "Id": 6,
+    "name": "Strategy",
+    "description": "Strategic planning frameworks and long-term thinking for sustainable business growth and development.",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "createdBy": "system"
+  },
+  {
+    "Id": 7,
+    "name": "Interviews & Panels",
+    "description": "Recorded interviews, panel discussions, and thought leadership conversations on various business and leadership topics.",
+    "createdAt": "2023-01-01T00:00:00Z",
+    "createdBy": "system"
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "Id": 1,
+    "text": "What are the key principles for building a successful family business charter?",
+    "userId": "user-1",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "answerFormat": "detailed"
+  },
+  {
+    "Id": 2,
+    "text": "How do I handle conflict between family members in the business?",
+    "userId": "user-2",
+    "timestamp": "2024-01-15T14:22:00Z",
+    "answerFormat": "detailed"
+  },
+  {
+    "Id": 3,
+    "text": "What's the best approach for succession planning in a family business?",
+    "userId": "user-1",
+    "timestamp": "2024-01-16T09:15:00Z",
+    "answerFormat": "summary"
+  },
+  {
+    "Id": 4,
+    "text": "How can I apply biblical principles to business leadership?",
+    "userId": "user-3",
+    "timestamp": "2024-01-16T16:45:00Z",
+    "answerFormat": "detailed"
+  },
+  {
+    "Id": 5,
+    "text": "What KPI framework works best for sales teams in FMCG?",
+    "userId": "user-2",
+    "timestamp": "2024-01-17T11:30:00Z",
+    "answerFormat": "detailed"
+  }
+]

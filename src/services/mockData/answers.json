@@ -1,0 +1,26 @@
+[
+  {
+    "Id": 1,
+    "questionId": 1,
+    "content": "<h3>Family Business Charter Framework</h3><p>A successful family business charter requires clear governance, defined roles, and shared values...</p>",
+    "citations": [1, 2, 3],
+    "confidence": 0.92,
+    "generatedAt": "2024-01-15T10:35:00Z"
+  },
+  {
+    "Id": 2,
+    "questionId": 2,
+    "content": "<h3>Conflict Resolution in Family Business</h3><p>Address conflicts early through structured processes and clear communication protocols...</p>",
+    "citations": [4, 5],
+    "confidence": 0.88,
+    "generatedAt": "2024-01-15T14:27:00Z"
+  },
+  {
+    "Id": 3,
+    "questionId": 3,
+    "content": "• Start succession planning 5-10 years early\n• Develop next-gen leaders outside the business first\n• Create transparent evaluation criteria\n• Establish mentoring relationships",
+    "citations": [1, 6],
+    "confidence": 0.90,
+    "generatedAt": "2024-01-16T09:20:00Z"
+  }
+]

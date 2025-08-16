@@ -1,0 +1,92 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import 'react-toastify/dist/ReactToastify.css';
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #FDFBF7;
+    color: #1f3f24;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .toastify-container {
+    @apply text-sm;
+  }
+  
+  .Toastify__toast {
+    @apply bg-white border border-gray-200 text-gray-800 shadow-lg rounded-lg;
+  }
+  
+  .Toastify__toast--success {
+    @apply bg-success text-white;
+  }
+  
+  .Toastify__toast--error {
+    @apply bg-error text-white;
+  }
+  
+  .Toastify__toast--warning {
+    @apply bg-warning text-white;
+  }
+  
+  .Toastify__toast--info {
+    @apply bg-info text-white;
+  }
+  
+  .confidence-meter {
+    background: linear-gradient(90deg, #B22222 0%, #DAA520 50%, #4A7C59 100%);
+  }
+  
+  .citation-highlight {
+    @apply bg-accent-100 border border-accent-300 rounded px-1;
+  }
+  
+  .stream-indicator::before {
+    content: '';
+    @apply inline-block w-2 h-2 bg-primary-500 rounded-full animate-pulse mr-1;
+  }
+  
+  .collection-icon {
+    @apply transition-transform duration-200 ease-out;
+  }
+  
+  .collection-icon:hover {
+    @apply scale-110;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, #2C5530 0%, #8B6F47 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-md border border-white/20;
+  }
+  
+  .elevation-1 {
+    box-shadow: 0 2px 8px rgba(44, 85, 48, 0.1);
+  }
+  
+  .elevation-2 {
+    box-shadow: 0 4px 16px rgba(44, 85, 48, 0.15);
+  }
+  
+  .elevation-3 {
+    box-shadow: 0 8px 32px rgba(44, 85, 48, 0.2);
+  }
+}
