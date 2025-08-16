@@ -84,6 +84,8 @@ const proceedWithUpload = async () => {
     if (pendingFiles.length === 0) return;
 
     setUploading(true);
+    let successCount = 0;
+    let failCount = 0;
 
     for (const file of pendingFiles) {
       try {
@@ -96,7 +98,7 @@ const proceedWithUpload = async () => {
         // Extract file content for searchability
         const fileContent = await extractFileContent(file.file);
         
-        // Save to content table
+        // Save to content table with proper field mapping
         const contentRecord = {
           Name: file.name,
           title_c: file.name,
@@ -108,9 +110,10 @@ const proceedWithUpload = async () => {
 
         const contentResult = await contentService.create([contentRecord]);
         
-        // Also save to source table for searchability
+        // Also save to source table for searchability with proper field mapping
         const { sourcesService } = await import("@/services/api/sourcesService");
         const sourceRecord = {
+          Name: file.name,
           title_c: file.name,
           content_c: fileContent,
           content_type_c: getContentType(file.type),
@@ -130,14 +133,23 @@ const proceedWithUpload = async () => {
         
         updateFileProperty(file.id, "status", "completed");
         updateFileProperty(file.id, "progress", 100);
+        successCount++;
       } catch (error) {
+        console.error(`Failed to upload ${file.name}:`, error);
         updateFileProperty(file.id, "status", "error");
         updateFileProperty(file.id, "error", error.message);
+        failCount++;
       }
     }
 
     setUploading(false);
-    toast.success(`Successfully uploaded ${pendingFiles.length} file(s) to ${selectedCollection}`);
+    
+    if (successCount > 0) {
+      toast.success(`Successfully uploaded and saved ${successCount} file(s) to the database`);
+    }
+    if (failCount > 0) {
+      toast.error(`${failCount} file(s) failed to upload. Check individual file status for details.`);
+    }
   };
 
   // Extract searchable content from files
@@ -214,22 +226,23 @@ const handleUploadAll = async () => {
       return;
     }
 
+    // Check if user has selected a collection that requires password
+    if (defaultCollection && !selectedCollection) {
+      requestPasswordForUpload(defaultCollection);
+      return;
+    }
+
     setUploading(true);
+    let successCount = 0;
+    let failCount = 0;
+
     try {
       // Update all pending files to uploading status
       pendingFiles.forEach(file => {
         updateFileProperty(file.id, "status", "uploading");
       });
 
-      // Check if user has selected a collection that requires password
-      if (defaultCollection && !selectedCollection) {
-        requestPasswordForUpload(defaultCollection);
-        return;
-      }
-
       const { sourcesService } = await import("@/services/api/sourcesService");
-      let successCount = 0;
-      let failCount = 0;
 
       // Process each file individually for better error handling
       for (const file of pendingFiles) {
@@ -240,7 +253,7 @@ const handleUploadAll = async () => {
           // Extract file content for searchability
           const fileContent = await extractFileContent(file.file);
           
-          // Create content record
+          // Create content record with proper field mapping
           const contentRecord = {
             Name: file.name,
             title_c: file.name,
@@ -252,8 +265,9 @@ const handleUploadAll = async () => {
 
           const contentResult = await contentService.create([contentRecord]);
           
-          // Create corresponding source record for searchability
+          // Create corresponding source record for searchability with proper field mapping
           const sourceRecord = {
+            Name: file.name,
             title_c: file.name,
             content_c: fileContent,
             content_type_c: getContentType(file.type),
@@ -276,7 +290,7 @@ const handleUploadAll = async () => {
         } catch (error) {
           console.error(`Failed to upload ${file.name}:`, error);
           updateFileProperty(file.id, "status", "error");
-          updateFileProperty(file.id, "error", error.message);
+          updateFileProperty(file.id, "error", error.message || "Upload failed");
           failCount++;
         }
       }
@@ -291,8 +305,10 @@ const handleUploadAll = async () => {
       toast.error("Upload process failed. Please try again.");
       console.error("Upload error:", error);
       pendingFiles.forEach(file => {
-        updateFileProperty(file.id, "status", "error");
-        updateFileProperty(file.id, "error", "Upload failed");
+        if (file.status === "uploading") {
+          updateFileProperty(file.id, "status", "error");
+          updateFileProperty(file.id, "error", "Upload process failed");
+        }
       });
     } finally {
       setUploading(false);
@@ -431,8 +447,19 @@ const clearCompleted = () => {
                 disabled={uploading || pendingCount === 0 || !defaultCollection}
                 className="flex items-center gap-2"
               >
-                <ApperIcon name="Upload" size={16} />
-                Upload All ({pendingCount})
+                {uploading ? (
+                  <>
+                    <div className="animate-spin">
+                      <ApperIcon name="Loader" size={16} />
+                    </div>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <ApperIcon name="Upload" size={16} />
+                    Upload All ({pendingCount})
+                  </>
+                )}
               </Button>
             </div>
           </div>

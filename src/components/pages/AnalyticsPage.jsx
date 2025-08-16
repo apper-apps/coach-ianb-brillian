@@ -19,7 +19,7 @@ const AnalyticsPage = () => {
     { value: "90d", label: "Last 90 Days" }
   ];
 
-  const loadAnalytics = async () => {
+const loadAnalytics = async () => {
     setLoading(true);
     setError("");
     
@@ -27,7 +27,24 @@ const AnalyticsPage = () => {
       const analyticsData = await analyticsService.getMetrics(timeRange);
       setData(analyticsData);
     } catch (err) {
-      setError("Failed to load analytics. Please try again.");
+      // Reset to default structure on error to ensure dashboard displays
+      setData({
+        questionsCount: 0,
+        avgConfidence: 0,
+        activeUsers: 0,
+        sourceUtilization: 0,
+        peakQuestions: 0,
+        peakDay: "N/A",
+        questionsGrowth: 0,
+        confidenceChange: 0,
+        usersGrowth: 0,
+        utilizationChange: 0,
+        topTopics: [],
+        confidenceDistribution: [],
+        coverageGaps: [],
+        mostReferencedSources: []
+      });
+      setError("Analytics data reset. Dashboard showing default values.");
       console.error("Load analytics error:", err);
     } finally {
       setLoading(false);
@@ -111,11 +128,11 @@ const AnalyticsPage = () => {
             <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
               <ApperIcon name="MessageCircle" size={20} className="text-white" />
             </div>
-            <div>
-<p className="text-sm text-primary-600 font-medium">Questions Asked</p>
-              <p className="text-2xl font-bold text-primary-800">{data.questionsCount}</p>
+<div>
+              <p className="text-sm text-primary-600 font-medium">Questions Asked</p>
+              <p className="text-2xl font-bold text-primary-800">{data.questionsCount || 0}</p>
               <p className="text-xs text-primary-600">
-                {data.questionsGrowth > 0 ? "+" : ""}{data.questionsGrowth}% vs last period
+                {(data.questionsGrowth || 0) > 0 ? "+" : ""}{Math.round(data.questionsGrowth || 0)}% vs last period
               </p>
             </div>
           </div>
@@ -126,13 +143,13 @@ const AnalyticsPage = () => {
             <div className="w-10 h-10 bg-secondary-600 rounded-lg flex items-center justify-center">
               <ApperIcon name="Target" size={20} className="text-white" />
             </div>
-            <div>
-<p className="text-sm text-secondary-600 font-medium">Avg Confidence</p>
+<div>
+              <p className="text-sm text-secondary-600 font-medium">Avg Confidence</p>
               <p className="text-2xl font-bold text-secondary-800">
-                {Math.round(data.avgConfidence * 100)}%
+                {Math.round((data.avgConfidence || 0) * 100)}%
               </p>
               <p className="text-xs text-secondary-600">
-                {data.confidenceChange > 0 ? "+" : ""}{data.confidenceChange}% vs last period
+                {(data.confidenceChange || 0) > 0 ? "+" : ""}{Math.round(data.confidenceChange || 0)}% vs last period
               </p>
             </div>
           </div>
@@ -144,10 +161,10 @@ const AnalyticsPage = () => {
               <ApperIcon name="Users" size={20} className="text-white" />
             </div>
             <div>
-              <p className="text-sm text-accent-600 font-medium">Active Users</p>
-              <p className="text-2xl font-bold text-accent-800">{data.activeUsers}</p>
+<p className="text-sm text-accent-600 font-medium">Active Users</p>
+              <p className="text-2xl font-bold text-accent-800">{data.activeUsers || 0}</p>
               <p className="text-xs text-accent-600">
-                {data.usersGrowth > 0 ? "+" : ""}{data.usersGrowth}% vs last period
+                {(data.usersGrowth || 0) > 0 ? "+" : ""}{Math.round(data.usersGrowth || 0)}% vs last period
               </p>
             </div>
           </div>
@@ -159,12 +176,12 @@ const AnalyticsPage = () => {
               <ApperIcon name="Library" size={20} className="text-white" />
             </div>
             <div>
-              <p className="text-sm text-success font-medium">Source Utilization</p>
+<p className="text-sm text-success font-medium">Source Utilization</p>
               <p className="text-2xl font-bold text-success">
-                {Math.round(data.sourceUtilization * 100)}%
+                {Math.round((data.sourceUtilization || 0) * 100)}%
               </p>
               <p className="text-xs text-success">
-                {data.utilizationChange > 0 ? "+" : ""}{data.utilizationChange}% vs last period
+                {(data.utilizationChange || 0) > 0 ? "+" : ""}{Math.round(data.utilizationChange || 0)}% vs last period
               </p>
             </div>
           </div>
@@ -180,7 +197,7 @@ const AnalyticsPage = () => {
             <div className="text-center">
               <ApperIcon name="TrendingUp" size={48} className="text-gray-400 mx-auto mb-2" />
               <p className="text-gray-500">Chart visualization would appear here</p>
-              <p className="text-sm text-gray-400">Peak: {data.peakQuestions} questions on {data.peakDay}</p>
+<p className="text-sm text-gray-400">Peak: {data.peakQuestions || 0} questions on {data.peakDay || "N/A"}</p>
             </div>
           </div>
         </Card>
@@ -188,8 +205,8 @@ const AnalyticsPage = () => {
         {/* Top Topics */}
         <Card elevation="1">
           <h3 className="font-semibold text-gray-900 mb-4">Top Topics</h3>
-          <div className="space-y-3">
-            {data.topTopics.map((topic, index) => (
+<div className="space-y-3">
+            {(data.topTopics || []).length > 0 ? data.topTopics.map((topic, index) => (
               <div key={topic.name} className="flex items-center gap-3">
                 <div className="w-6 h-6 bg-primary-600 text-white rounded text-xs flex items-center justify-center font-medium">
                   {index + 1}
@@ -202,20 +219,25 @@ const AnalyticsPage = () => {
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-primary-600 h-2 rounded-full"
-                      style={{ width: `${(topic.count / data.topTopics[0].count) * 100}%` }}
+                      style={{ width: `${data.topTopics[0] ? (topic.count / data.topTopics[0].count) * 100 : 0}%` }}
                     />
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>No topic data available</p>
+                <p className="text-sm">Topics will appear as questions are asked</p>
+              </div>
+            )}
           </div>
         </Card>
 
         {/* Confidence Distribution */}
         <Card elevation="1">
           <h3 className="font-semibold text-gray-900 mb-4">Answer Confidence Distribution</h3>
-          <div className="space-y-3">
-            {data.confidenceDistribution.map((level) => (
+<div className="space-y-3">
+            {(data.confidenceDistribution || []).length > 0 ? data.confidenceDistribution.map((level) => (
               <div key={level.range} className="flex items-center gap-3">
                 <div className={`w-3 h-3 rounded-full ${
                   level.range === "High (80-100%)" ? "bg-success" :
@@ -237,15 +259,20 @@ const AnalyticsPage = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>No confidence data available</p>
+                <p className="text-sm">Distribution will appear as answers are generated</p>
+              </div>
+            )}
           </div>
         </Card>
 
         {/* Coverage Gaps */}
         <Card elevation="1">
           <h3 className="font-semibold text-gray-900 mb-4">Coverage Gaps</h3>
-          <div className="space-y-3">
-            {data.coverageGaps.map((gap, index) => (
+<div className="space-y-3">
+            {(data.coverageGaps || []).length > 0 ? data.coverageGaps.map((gap, index) => (
               <div key={index} className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <ApperIcon name="AlertTriangle" size={16} className="text-warning" />
@@ -254,10 +281,15 @@ const AnalyticsPage = () => {
                 <p className="text-sm text-yellow-700">{gap.description}</p>
                 <div className="flex items-center justify-between mt-2 text-xs text-yellow-600">
                   <span>{gap.frequency} questions</span>
-                  <span>Avg confidence: {Math.round(gap.avgConfidence * 100)}%</span>
+                  <span>Avg confidence: {Math.round((gap.avgConfidence || 0) * 100)}%</span>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>No coverage gaps identified</p>
+                <p className="text-sm">Gaps will be identified as the knowledge base grows</p>
+              </div>
+            )}
           </div>
         </Card>
       </div>
@@ -277,29 +309,39 @@ const AnalyticsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {data.mostReferencedSources.map((source, index) => (
-                <tr key={source.id} className="border-b border-gray-100 hover:bg-gray-50">
+{(data.mostReferencedSources || []).length > 0 ? data.mostReferencedSources.map((source, index) => (
+                <tr key={source.id || index} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-2">
                       <ApperIcon 
                         name={source.contentType === "pdf" ? "FileText" : 
-                              source.contentType === "audio" ? "Mic" : "Video"} 
+                              source.contentType === "audio" ? "Mic" : 
+                              source.contentType === "video" ? "Video" : "File"} 
                         size={16} 
                         className="text-gray-500"
                       />
-                      <span className="font-medium text-gray-900">{source.title}</span>
+                      <span className="font-medium text-gray-900">{source.title || "Untitled"}</span>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-gray-600">{source.collection}</td>
-                  <td className="py-3 px-4 text-gray-900 font-medium">{source.references}</td>
+                  <td className="py-3 px-4 text-gray-600">{source.collection || "Unknown"}</td>
+                  <td className="py-3 px-4 text-gray-900 font-medium">{source.references || 0}</td>
                   <td className="py-3 px-4">
-                    <span className="text-gray-900">{Math.round(source.avgRelevance * 100)}%</span>
+                    <span className="text-gray-900">{Math.round((source.avgRelevance || 0) * 100)}%</span>
                   </td>
                   <td className="py-3 px-4 text-gray-600">
-                    {new Date(source.lastUsed).toLocaleDateString()}
+                    {source.lastUsed ? new Date(source.lastUsed).toLocaleDateString() : "N/A"}
                   </td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan="5" className="py-8 text-center text-gray-500">
+                    <div>
+                      <p>No source data available</p>
+                      <p className="text-sm">Referenced sources will appear as content is used</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
