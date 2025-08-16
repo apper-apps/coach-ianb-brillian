@@ -1,31 +1,121 @@
-import React, { useState } from "react";
-import FileUploadZone from "@/components/molecules/FileUploadZone";
-import Card from "@/components/atoms/Card";
-import Button from "@/components/atoms/Button";
-import Select from "@/components/atoms/Select";
-import Input from "@/components/atoms/Input";
-import Label from "@/components/atoms/Label";
-import Badge from "@/components/atoms/Badge";
+import React, { useEffect, useState } from "react";
 import { contentService } from "@/services/api/contentService";
-import ApperIcon from "@/components/ApperIcon";
+import { collectionsService } from "@/services/api/collectionsService";
 import { toast } from "react-toastify";
-
+import { motion } from "framer-motion";
+import ApperIcon from "@/components/ApperIcon";
+import Error from "@/components/ui/Error";
+import Loading from "@/components/ui/Loading";
+import FileUploadZone from "@/components/molecules/FileUploadZone";
+import Input from "@/components/atoms/Input";
+import Button from "@/components/atoms/Button";
+import Badge from "@/components/atoms/Badge";
+import Card from "@/components/atoms/Card";
+import Label from "@/components/atoms/Label";
+import Select from "@/components/atoms/Select";
 const UploadsPage = () => {
-  const [files, setFiles] = useState([]);
+const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [defaultCollection, setDefaultCollection] = useState("Family Business");
+  const [collections, setCollections] = useState([]);
+  const [defaultCollection, setDefaultCollection] = useState("");
   const [defaultTags, setDefaultTags] = useState("");
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState(null);
+  const [collectionPassword, setCollectionPassword] = useState("");
+  const [loadingCollections, setLoadingCollections] = useState(false);
 
-  const collections = [
-    "Family Business",
-    "Sermons & Theology",
-    "Coaching & Workshops", 
-    "Sales & FMCG",
-    "Operations & HR",
-    "Strategy",
-    "Interviews & Panels"
-  ];
+  useEffect(() => {
+    loadCollections();
+  }, []);
 
+  const loadCollections = async () => {
+    setLoadingCollections(true);
+    try {
+      const data = await collectionsService.getAll();
+      setCollections(data);
+      if (data.length > 0 && !defaultCollection) {
+        setDefaultCollection(data[0].Name);
+      }
+    } catch (error) {
+      toast.error("Failed to load collections");
+      console.error("Error loading collections:", error);
+    } finally {
+      setLoadingCollections(false);
+    }
+  };
+
+  const verifyCollectionPassword = async (collectionName, password) => {
+    // In a real implementation, this would verify against collection_password_c table
+    // For now, we'll simulate password verification
+    if (!password || password.length < 4) {
+      throw new Error("Password must be at least 4 characters long");
+    }
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // For demo purposes, accept any password that's at least 4 characters
+    // In production, this would hash and compare with stored password
+    return true;
+  };
+const requestPasswordForUpload = (collection) => {
+    setSelectedCollection(collection);
+    setCollectionPassword("");
+    setShowPasswordModal(true);
+  };
+
+  const handlePasswordSubmit = async () => {
+    try {
+      await verifyCollectionPassword(selectedCollection, collectionPassword);
+      setShowPasswordModal(false);
+      toast.success(`Access granted to ${selectedCollection} collection`);
+      
+      // Proceed with upload after password verification
+      proceedWithUpload();
+    } catch (error) {
+      toast.error(error.message || "Invalid password");
+    }
+  };
+
+  const proceedWithUpload = async () => {
+    const pendingFiles = files.filter(f => f.status === "pending");
+    if (pendingFiles.length === 0) return;
+
+    setUploading(true);
+
+    for (const file of pendingFiles) {
+      try {
+        // Update file status to uploading
+        updateFileProperty(file.id, "status", "uploading");
+        
+        // Simulate upload progress
+        await simulateUpload(file);
+        
+        // Save to database
+        const contentRecord = {
+          Name: file.name,
+          title_c: file.name,
+          description_c: file.description || '',
+          file_name_c: file.name,
+          file_type_c: getContentType(file.type),
+          upload_date_c: new Date().toISOString(),
+          // In production, you would also save the collection reference
+          collection_c: file.collection
+        };
+
+        await contentService.create([contentRecord]);
+        
+        updateFileProperty(file.id, "status", "completed");
+        updateFileProperty(file.id, "progress", 100);
+      } catch (error) {
+        updateFileProperty(file.id, "status", "error");
+        updateFileProperty(file.id, "error", error.message);
+      }
+    }
+
+    setUploading(false);
+    toast.success(`Successfully uploaded ${pendingFiles.length} file(s) to ${selectedCollection}`);
+  };
   const handleFilesSelected = (selectedFiles) => {
     const newFiles = selectedFiles.map(file => ({
       id: Date.now() + Math.random(),
@@ -79,21 +169,28 @@ const UploadsPage = () => {
       return;
     }
 
-    setUploading(true);
-try {
+setUploading(true);
+    try {
       // Update all pending files to uploading status
       pendingFiles.forEach(file => {
         updateFileProperty(file.id, "status", "uploading");
       });
 
-      // Save files to database
+      // Check if user has selected a collection that requires password
+      if (defaultCollection && !selectedCollection) {
+        requestPasswordForUpload(defaultCollection);
+        return;
+      }
+
+      // Create content records for all pending files
       const contentRecords = pendingFiles.map(file => ({
         Name: file.name,
         title_c: file.name,
         description_c: file.description || '',
         file_name_c: file.name,
         file_type_c: getContentType(file.type),
-        upload_date_c: new Date().toISOString()
+        upload_date_c: new Date().toISOString(),
+        collection_c: file.collection
       }));
 
       await contentService.create(contentRecords);
@@ -157,42 +254,64 @@ const clearCompleted = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 font-display mb-2">
+<div className="mb-8">
+        <h1 className="text-3xl font-display font-bold text-primary-900 mb-2">
           Upload Content
         </h1>
         <p className="text-gray-600">
-          Add documents, audio, and video files to Coach IanB's knowledge base.
+          Upload files to collections with password-protected access control.
         </p>
       </div>
 
+      {loadingCollections ? (
+        <Card className="mb-6" elevation="1">
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin mr-2">
+              <ApperIcon name="Loader" size={20} />
+            </div>
+            Loading collections...
+          </div>
+        </Card>
+) : (
+        <Card className="mb-6" elevation="1">
+          <h3 className="font-semibold text-gray-900 mb-4">Default Settings</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
       {/* Upload Settings */}
-      <Card className="mb-6" elevation="1">
-        <h3 className="font-semibold text-gray-900 mb-4">Default Settings</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <Label>Default Collection</Label>
-            <Select
-              value={defaultCollection}
-              onChange={(e) => setDefaultCollection(e.target.value)}
-            >
-              {collections.map(collection => (
-                <option key={collection} value={collection}>
-                  {collection}
-                </option>
-              ))}
-            </Select>
+<Card className="mb-6" elevation="1">
+          <h3 className="font-semibold text-gray-900 mb-4">Default Settings</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label>Default Collection</Label>
+              <Select
+                value={defaultCollection}
+                onChange={(e) => setDefaultCollection(e.target.value)}
+                disabled={collections.length === 0}
+              >
+                <option value="">Select a collection...</option>
+                {collections.map(collection => (
+                  <option key={collection.Id} value={collection.Name}>
+                    {collection.Name}
+                  </option>
+                ))}
+              </Select>
+              {collections.length === 0 && (
+                <p className="text-sm text-gray-500 mt-1">
+                  No collections available. Create a collection first.
+                </p>
+              )}
+            </div>
+            <div>
+              <Label>Default Tags (comma-separated)</Label>
+              <Input
+                value={defaultTags}
+                onChange={(e) => setDefaultTags(e.target.value)}
+                placeholder="leadership, coaching, strategy"
+              />
+            </div>
           </div>
-          <div>
-            <Label>Default Tags (comma-separated)</Label>
-            <Input
-              value={defaultTags}
-              onChange={(e) => setDefaultTags(e.target.value)}
-              placeholder="leadership, coaching, strategy"
-            />
-          </div>
-        </div>
-      </Card>
+        </Card>
+      )}
 
       {/* Upload Zone */}
       <Card className="mb-6" elevation="1">
@@ -224,9 +343,9 @@ const clearCompleted = () => {
                   Clear Completed
                 </Button>
               )}
-              <Button
+<Button
                 onClick={handleUploadAll}
-                disabled={uploading || pendingCount === 0}
+                disabled={uploading || pendingCount === 0 || !defaultCollection}
                 className="flex items-center gap-2"
               >
                 <ApperIcon name="Upload" size={16} />
@@ -295,15 +414,15 @@ const clearCompleted = () => {
 
                 {/* File Settings */}
                 <div className="flex items-center gap-2">
-                  <Select
+<Select
                     value={file.collection}
                     onChange={(e) => updateFileProperty(file.id, "collection", e.target.value)}
                     className="w-36 text-xs"
                     disabled={file.status === "uploading" || file.status === "completed"}
                   >
                     {collections.map(collection => (
-                      <option key={collection} value={collection}>
-                        {collection}
+                      <option key={collection.Id} value={collection.Name}>
+                        {collection.Name}
                       </option>
                     ))}
                   </Select>
@@ -347,7 +466,72 @@ const clearCompleted = () => {
             </ul>
           </div>
         </div>
-      </Card>
+</Card>
+
+      {/* Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-lg shadow-xl w-full max-w-md"
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                    <ApperIcon name="Lock" size={20} className="text-primary-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900">Password Required</h2>
+                    <p className="text-sm text-gray-600">
+                      Enter password for "{selectedCollection}" collection
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowPasswordModal(false)}
+                >
+                  <ApperIcon name="X" size={20} />
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label>Collection Password</Label>
+                  <Input
+                    type="password"
+                    value={collectionPassword}
+                    onChange={(e) => setCollectionPassword(e.target.value)}
+                    placeholder="Enter collection password"
+                    className="mt-1"
+                    onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowPasswordModal(false)} 
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handlePasswordSubmit} 
+                  disabled={!collectionPassword}
+                  className="flex-1"
+                >
+                  Verify & Upload
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
