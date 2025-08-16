@@ -6,6 +6,7 @@ import Select from "@/components/atoms/Select";
 import Input from "@/components/atoms/Input";
 import Label from "@/components/atoms/Label";
 import Badge from "@/components/atoms/Badge";
+import { contentService } from "@/services/api/contentService";
 import ApperIcon from "@/components/ApperIcon";
 import { toast } from "react-toastify";
 
@@ -79,19 +80,31 @@ const UploadsPage = () => {
     }
 
     setUploading(true);
-    
-    try {
+try {
       // Update all pending files to uploading status
       pendingFiles.forEach(file => {
         updateFileProperty(file.id, "status", "uploading");
       });
 
-      // Simulate uploads
+      // Save files to database
+      const contentRecords = pendingFiles.map(file => ({
+        Name: file.name,
+        title_c: file.name,
+        description_c: file.description || '',
+        file_name_c: file.name,
+        file_type_c: getContentType(file.type),
+        upload_date_c: new Date().toISOString()
+      }));
+
+      await contentService.create(contentRecords);
+      
+      // Simulate upload progress
       await Promise.all(pendingFiles.map(file => simulateUpload(file)));
       
-      toast.success(`Successfully uploaded ${pendingFiles.length} file(s)`);
+      toast.success(`Successfully uploaded and saved ${pendingFiles.length} file(s)`);
     } catch (error) {
       toast.error("Some uploads failed. Please try again.");
+      console.error("Upload error:", error);
       pendingFiles.forEach(file => {
         updateFileProperty(file.id, "status", "error");
         updateFileProperty(file.id, "error", "Upload failed");
@@ -100,10 +113,16 @@ const UploadsPage = () => {
       setUploading(false);
     }
   };
-
-  const clearCompleted = () => {
+const clearCompleted = () => {
     setFiles(prev => prev.filter(file => file.status !== "completed"));
     toast.success("Cleared completed uploads");
+  };
+
+  const getContentType = (mimeType) => {
+    if (mimeType.includes("pdf")) return "pdf";
+    if (mimeType.startsWith("audio/")) return "audio";
+    if (mimeType.startsWith("video/")) return "video";
+    return "document";
   };
 
   const getFileIcon = (type) => {
@@ -115,7 +134,6 @@ const UploadsPage = () => {
     if (type.includes("spreadsheet") || type.includes("xlsx")) return "Sheet";
     return "File";
   };
-
   const getStatusColor = (status) => {
     switch (status) {
       case "completed": return "success";
