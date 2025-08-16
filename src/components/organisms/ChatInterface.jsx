@@ -43,10 +43,10 @@ const ChatInterface = ({ className = "" }) => {
     setInput("");
     setIsLoading(true);
 
-    try {
+try {
 const question = await questionsService.create({
         text: userMessage.content,
-        userId: "current-user",
+        userId: 1,
         answerFormat: answerFormat
       });
 

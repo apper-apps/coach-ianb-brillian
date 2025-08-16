@@ -73,9 +73,9 @@ class QuestionsService {
     try {
       const params = {
         records: [{
-          Name: questionData.text?.substring(0, 50) || "Question",
+Name: questionData.text?.substring(0, 50) || "Question",
           text_c: questionData.text,
-          user_id_c: questionData.userId || questionData.user_id_c,
+          user_id_c: parseInt(questionData.userId || questionData.user_id_c) || 1,
           timestamp_c: new Date().toISOString(),
           answer_format_c: questionData.answerFormat || questionData.answer_format_c || "detailed"
         }]
@@ -91,11 +91,14 @@ class QuestionsService {
       if (response.results) {
         const failedRecords = response.results.filter(result => !result.success);
         if (failedRecords.length > 0) {
-          console.error(`Failed to create questions ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
+console.error(`Failed to create questions ${failedRecords.length} records:${JSON.stringify(failedRecords)}`);
           failedRecords.forEach(record => {
             record.errors?.forEach(error => {
               throw new Error(`${error.fieldLabel}: ${error.message}`);
             });
+            if (record.message) {
+              throw new Error(record.message);
+            }
           });
         }
         
