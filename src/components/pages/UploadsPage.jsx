@@ -44,18 +44,20 @@ const [files, setFiles] = useState([]);
     }
   };
 
-  const verifyCollectionPassword = async (collectionName, password) => {
-    // In a real implementation, this would verify against collection_password_c table
-    // For now, we'll simulate password verification
-    if (!password || password.length < 4) {
-      throw new Error("Password must be at least 4 characters long");
+const verifyCollectionPassword = async (collectionName, password) => {
+    // Check for the specific required password
+    if (!password) {
+      throw new Error("Password is required");
     }
     
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // For demo purposes, accept any password that's at least 4 characters
-    // In production, this would hash and compare with stored password
+    // Verify against the specific password
+    if (password !== "M1an3^@1965") {
+      throw new Error("Invalid password");
+    }
+    
     return true;
   };
 const requestPasswordForUpload = (collection) => {
